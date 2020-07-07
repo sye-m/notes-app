@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddForeignKeyGroupIdToNotesTable extends Migration
+class CreateNotesGroup extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,15 @@ class AddForeignKeyGroupIdToNotesTable extends Migration
      */
     public function up()
     {
-        Schema::table('notes', function (Blueprint $table) {
-            $table->foreign('group_id')->references('id')->on('notes_group')->onDelete('set null');
-            
+        Schema::create('notes_groups', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
@@ -26,8 +30,6 @@ class AddForeignKeyGroupIdToNotesTable extends Migration
      */
     public function down()
     {
-        Schema::table('notes', function (Blueprint $table) {
-            $table->dropForeign('group_id');
-        });
+        //
     }
 }
