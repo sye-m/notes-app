@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
 use App\User;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
+use \GuzzleHttp\Client;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -19,7 +22,6 @@ class UserController extends Controller
     {
         return Validator::make($request->all(), array(
             'name' => 'required|string|max:255',
-            'user_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
         ));
@@ -27,12 +29,21 @@ class UserController extends Controller
   
     public function register(Request $request)
     {
-        $user = new User;
+        if(!$request->all()){
+            response()->json(['error_message'=>'User is already registered','errors'=>$errors],409);   
+        }
+
         $validator = $this->validator($request);
         if($validator->fails()){
             return response()->json(['user'=>$request->all(),'errors'=>$validator->errors()]);
         }
-        User::create($request->all());
+
+        $user = new User;
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->save();
+
         return $this->registered($request, $user)
                       ?response()->json(['success_message'=>'You are successfully registered'],202): response()->json(['error_message'=>'User is already registered','errors'=>$errors],409);
     }
@@ -40,44 +51,33 @@ class UserController extends Controller
    
     public function login(Request $request)
     {
-        $user = new User;
-        if ($this->registered($request,$user)){
-            $user = $user->where('email',$request->email)->get();
-            $token =  $user->createToken('Personal Access Token')->accessToken;
-            $cookie = $this->getCookieDetails($token);
-            return response()
-                ->json([
-                    'logged_in_user' => $user,
-                    'token' => $token,
-                ], 200)
-                ->cookie($cookie['name'], $cookie['value'], $cookie['minutes'], $cookie['path'], $cookie['domain'], $cookie['secure'], $cookie['httponly'], $cookie['samesite']);
-        } else {
-            return response()->json(
-                ['error' => 'invalid-credentials'], 422);
+        $http = new Client;
+        $credentials = $request->only('email','password');
+        if(Auth::attempt($credentials)){
+            $user_id = User::select('id')->where('email',$request->email)->get();
         }
-    }
-    private function getCookieDetails($token)
-    {
-        return [
-            'name' => '_token',
-            'value' => $token,
-            'minutes' => 1440,
-            'path' => null,
-            'domain' => null,
-            // 'secure' => true, // for production
-            'secure' => null, // for localhost
-            'httponly' => true,
-            'samesite' => true,
-        ];
-    }
-
+        else{
+            return response()->json(['error'=>'Incorrect Email or Password']);
+        }
+        $response = $http->post('http://localhost:8001/oauth/token', [
+            'form_params' => [
+                'grant_type' => 'password',
+                'client_id' => '2',
+                'client_secret' => 'QE4W6RnYIklsqTywbov97sgcd1RcO5ZUyDUzATKC',
+                'username' => $request->email,
+                'password' => $request->password,
+                'scope' => '',
+            ],
+        ]);
+        
+        return response(['auth'=>json_decode((string) $response->getBody(), true),'user_id'=>$user_id],200);
+        
+            }
+    
+   
     public function logout(Request $request)
     {
-        $request->user()->token()->revoke();
-        $cookie = Cookie::forget('_token');
-        return response()->json([
-            'success_message' => 'You have successfully logged out'
-        ])->withCookie($cookie);
+      
     }
 
     

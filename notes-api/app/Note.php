@@ -3,18 +3,16 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\User;
-use App\NotesGroup;
 
 class Note extends Model
 {
-    protected $fillable = ['title','body','color'];
+    protected $fillable = ['title','body','color','notes_group_id'];
 
     public function user(){
-       return $this->belongsTo(User::class);
+       return $this->belongsTo('App\User');
     }
 
     public function notesGroup(){
-        return $this->belongsTo(NotesGroup::class);
+        return $this->belongsTo('App\NotesGroup');
     }
 }

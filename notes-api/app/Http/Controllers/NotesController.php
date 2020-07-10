@@ -3,17 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\User;
+use App\Note;
+use App\NotesGroup;
 class NotesController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($user_id)
     {
-        //
+        $user = new User(); 
+        $notes= User::find($user_id)->notes()->get();
+        return response()->json(['notes'=>$notes]);
     }
 
     /**

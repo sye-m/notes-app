@@ -5,11 +5,10 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Note;
-use App\NotesGroup;
+use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens,Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'user_name','name', 'email', 'password',
+        'name', 'email', 'password',
     ];
 
     /**
@@ -39,10 +38,10 @@ class User extends Authenticatable
     ];
 
     public function notes(){
-        return $this->hasMany(Note::class);
+        return $this->hasMany('App\Note');
     }
 
-    public function notesGroups(){
-        return $this->hasMany(NotesGroup::class);
+    public function notesGroup(){
+        return $this->hasMany('App\NotesGroup');
     }
 }
