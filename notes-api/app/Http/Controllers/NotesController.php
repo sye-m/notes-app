@@ -17,8 +17,10 @@ class NotesController extends Controller
     public function index($user_id)
     {
         $user = new User(); 
-        $notes= User::find($user_id)->notes()->get();
-        return response()->json(['notes'=>$notes]);
+        $user = User::find($user_id);
+        $notes= $user->notes()->where('notes_group_id',null)->get();
+        $notes_group = $user->notesGroup()->get();
+        return response()->json(['notes'=>$notes,'notes_groups'=>$notes_group]);
     }
 
     /**
@@ -29,7 +31,14 @@ class NotesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user_id = $request->userId;
+        $user = User::find($user_id);    
+        $note= $user->notes()->create([
+            'title'=>  $request->title,
+            'body' => $request->body,
+            'color'=> '#007bff'
+        ]);
+        return response()->json(['note'=>$note]);
     }
 
     /**
@@ -52,7 +61,13 @@ class NotesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $note = Note::find($id);
+        $note = $note->update([
+            'title'=>$request->title,
+            'body'=>$request->body,
+            'color'=>$request->color
+        ]);
+        return response()->json(['note'=>$note]);
     }
 
     /**
@@ -61,8 +76,10 @@ class NotesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request,$notes_ids)
     {
-        //
+        $ids = explode(',',$notes_ids);
+        Note::destroy($ids);
+        return response()->json(['data'=>'success']);
     }
 }
