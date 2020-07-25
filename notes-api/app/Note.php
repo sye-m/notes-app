@@ -12,7 +12,7 @@ class Note extends Model
        return $this->belongsTo('App\User');
     }
 
-    public function notesGroup(){
+    public function notesGroups(){
         return $this->belongsTo('App\NotesGroup');
     }
 }

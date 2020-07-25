@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\NotesGroup;
 use App\User;
 use App\Note;
+use App\Exceptions;
 class NotesGroupController extends Controller
 {
     /**
@@ -29,10 +30,18 @@ class NotesGroupController extends Controller
      */
     public function store(Request $request)
     {
-        $user = new User;
-        $user = User::find($request->user_id);
-        $user->notesGroup()->create(['title'=>$request->title]);
-        return response()->json(['title'=>'done']);
+        try{
+        $user = auth()->user();
+        $user = User::find($user->id);
+        if(!$user){
+            return response()->json(['error'=>'Invalid User'],404);
+        }
+        $notes_group = $user->notesGroups()->create(['title'=>$request->title]);
+        return response()->json(['notes_group'=>$notes_group],200);
+        }
+        catch(Exception $e){
+            return response()->json(['error'=>$e->getMessage()],500);
+        }
     }
 
     /**
@@ -57,7 +66,7 @@ class NotesGroupController extends Controller
     {
         $ids = explode(',',$request->notes_ids);
         Note::whereIn('id',$ids)->update(['notes_group_id'=>$id]);
-        return response()->json(['done'=>'done']);
+        return response()->json(['done'=>auth()->user()]);
     }
 
     /**

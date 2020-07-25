@@ -18,14 +18,14 @@ Route::post('api/login','UserController@login');
 Route::group(['middleware' => 'auth:api'], function() {
 
     Route::get('logout', 'UserController@logout');
-
-    Route::get('/api/notes/{user_id}','NotesController@index');
-    Route::post('api/notes','NotesController@store');
+    Route::get('/api/user','UserController@getUser');
+    Route::get('/api/notes','NotesController@index');
+    Route::post('/api/notes','NotesController@store');
     Route::put('/api/notes/{id}','NotesController@update');
-    Route::delete('api/notes/{notes_ids}','NotesController@destroy');
+    Route::delete('api/notes/','NotesController@destroy');
 
     Route::get('api/notesgroup/{group_id}','NotesGroupController@index');
-    Route::post('api/notesgroup','NotesGroupController@store');\
+    Route::post('api/notesgroup/','NotesGroupController@store');
     Route::put('api/notesgroup/{group_id}','NotesGroupController@update');
 
 });

@@ -9,15 +9,24 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use \GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
-
+use App\Exception;
 class UserController extends Controller
 {
     use HasApiTokens;
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
+ 
+    public function getUser(Request $request){
+        try{
+        $user = auth()->user();
+        if(!$user){
+            return resposne(['error'=> 'User not found'],404);
+        }
+        return response()->json(['user'=>$user],200);
     }
-
+    catch(Exception $e){
+        return response()->json(['error'=>'Server Error'],500);
+    }
+    }
+    
     public function validator(Request $request)
     {
         return Validator::make($request->all(), array(
@@ -62,8 +71,8 @@ class UserController extends Controller
         $response = $http->post('http://localhost:8001/oauth/token', [
             'form_params' => [
                 'grant_type' => 'password',
-                'client_id' => '2',
-                'client_secret' => 'QE4W6RnYIklsqTywbov97sgcd1RcO5ZUyDUzATKC',
+                'client_id' => '9121092e-4095-4610-98ca-72c30fa74529',
+                'client_secret' => 'OI7oiZkhSGnUyu1uiXUMVnMYmxj9AkuAQh4lDtho',
                 'username' => $request->email,
                 'password' => $request->password,
                 'scope' => '',

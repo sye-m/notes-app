@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\User;
 use App\Note;
 use App\NotesGroup;
+use App\Exception;
 class NotesController extends Controller
 {
     
@@ -14,12 +15,11 @@ class NotesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($user_id)
+    public function index()
     {
-        $user = new User(); 
-        $user = User::find($user_id);
+        $user = auth()->user();
         $notes= $user->notes()->where('notes_group_id',null)->get();
-        $notes_group = $user->notesGroup()->get();
+        $notes_group = $user->notesGroups()->get();
         return response()->json(['notes'=>$notes,'notes_groups'=>$notes_group]);
     }
 
@@ -31,14 +31,26 @@ class NotesController extends Controller
      */
     public function store(Request $request)
     {
+        try{
         $user_id = $request->userId;
-        $user = User::find($user_id);    
+        
+        $user = User::find($user_id);   
+        if(!$user){
+            return response()->json(['error'=>'Invalid User'],404);
+        } 
         $note= $user->notes()->create([
             'title'=>  $request->title,
             'body' => $request->body,
             'color'=> '#007bff'
         ]);
-        return response()->json(['note'=>$note]);
+        if(!$note){
+            return response()->json(['error'=>'Note not created'],422);
+        }
+        return response()->json(['note'=>$note],200);
+        }
+        catch(Exception $e){
+            return response()->json(['error'=>'Server Error'],500);
+        }
     }
 
     /**
@@ -61,13 +73,24 @@ class NotesController extends Controller
      */
     public function update(Request $request, $id)
     {
+        try{
         $note = Note::find($id);
-        $note = $note->update([
+        if(!$note){
+            return response()->json(['error'=>'Note not found'],404);
+        }
+        $note->update([
             'title'=>$request->title,
             'body'=>$request->body,
             'color'=>$request->color
         ]);
+        if(!$note){
+            return response()->json(['error'=>'Note not updated'],422);
+        }
         return response()->json(['note'=>$note]);
+    }
+        catch(Exception $e){
+            return response()->json(['error'=>'Server Error'],500);
+        }
     }
 
     /**
@@ -76,10 +99,21 @@ class NotesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request,$notes_ids)
+    public function destroy(Request $request)
     {
-        $ids = explode(',',$notes_ids);
-        Note::destroy($ids);
-        return response()->json(['data'=>'success']);
+        try{
+        $note_ids = $request->note_ids;
+        $group_ids = $request->group_ids;
+        if($note_ids!=[]){
+            auth()->user()->notes()->whereIn('id',$note_ids)->delete();
+        }
+        if($group_ids!=[]){
+            auth()->user()->notesGroups()->whereIn('id',$group_ids)->delete();
+        }
+        return response()->json(['data'=>'Notes deleted'],200);
+    }
+    catch(Exception $e){
+        return response()->json(['error'=>'Server Error'],500);
+    }
     }
 }

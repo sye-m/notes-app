@@ -20,6 +20,7 @@ class CreateNotesTable extends Migration
             $table->string('color');
             $table->unsignedBigInteger('notes_group_id')->default(null);
             $table->unsignedBigInteger('user_id');
+            $table->foreign('notes_group_id')->references('id')->on('notes_groups')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
 
