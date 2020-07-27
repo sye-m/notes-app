@@ -18,7 +18,7 @@ class NotesController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $notes= $user->notes()->where('notes_group_id',null)->get();
+        $notes= $user->notes()->get();
         $notes_group = $user->notesGroups()->get();
         return response()->json(['notes'=>$notes,'notes_groups'=>$notes_group]);
     }
@@ -32,9 +32,8 @@ class NotesController extends Controller
     public function store(Request $request)
     {
         try{
-        $user_id = $request->userId;
         
-        $user = User::find($user_id);   
+        $user = auth()->user();   
         if(!$user){
             return response()->json(['error'=>'Invalid User'],404);
         } 
