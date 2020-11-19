@@ -40,7 +40,7 @@ class NotesController extends Controller
         $note= $user->notes()->create([
             'title'=>  $request->title,
             'body' => $request->body,
-            'color'=> '#007bff'
+            'color'=> $request->color
         ]);
         if(!$note){
             return response()->json(['error'=>'Note not created'],422);

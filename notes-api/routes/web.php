@@ -17,7 +17,7 @@ Route::post('api/login','UserController@login');
 
 Route::group(['middleware' => 'auth:api'], function() {
 
-    Route::get('logout', 'UserController@logout');
+    Route::get('/api/user/logout', 'UserController@logout');
     Route::get('/api/user','UserController@getUser');
     Route::get('/api/notes','NotesController@index');
     Route::post('/api/notes','NotesController@store');

@@ -71,23 +71,19 @@ class UserController extends Controller
         $response = $http->post('http://localhost:8001/oauth/token', [
             'form_params' => [
                 'grant_type' => 'password',
-                'client_id' => '9121092e-4095-4610-98ca-72c30fa74529',
-                'client_secret' => 'OI7oiZkhSGnUyu1uiXUMVnMYmxj9AkuAQh4lDtho',
+                'client_id' => '91f915d7-899d-4883-8c2c-2753763bcdf1',
+                'client_secret' => '8L6B08Fa8A13Abim5dGNxF6sWphSHu83eYXWzdU5',
                 'username' => $request->email,
                 'password' => $request->password,
                 'scope' => '',
             ],
         ]);
         
-        return response(['auth'=>json_decode((string) $response->getBody(), true),'user_id'=>$user_id],200);
+        return response(['auth'=>json_decode((string) $response->getBody(), true),'user'=>auth()->user()],200);
         
             }
     
    
-    public function logout(Request $request)
-    {
-      
-    }
 
     
     public function registered(Request $request,User $user){
