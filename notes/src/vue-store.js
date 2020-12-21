@@ -6,7 +6,7 @@ Vue.use(Vuex);
 export const store = new Vuex.Store({
   state: {
     auth: {
-      loading: true,
+      loading: false,
       authenticated: false,
       user: {},
     },
@@ -27,6 +27,14 @@ export const store = new Vuex.Store({
   },
 
   mutations: {
+    //getting user's data
+    loadingUser: (state) => {
+      state.auth = {
+        ...state.auth,
+        loading: true,
+      };
+    },
+
     //set user's data after user has logged in
     setUser: (state, user) => {
       state.auth = {
@@ -107,7 +115,7 @@ export const store = new Vuex.Store({
     updateNotesGroup: (state, notes_group) => {
       state.notes = {
         ...state.notes,
-        notes_groups: [notes_group, ...notes_group],
+        notes_groups: [...state.notes.notes_groups, notes_group],
       };
     },
 
@@ -123,15 +131,20 @@ export const store = new Vuex.Store({
       state.note = { ...state.note, note: note, editNote: true };
     },
 
-    //after editing of note is done add that note to the notes array
+    //after editing of note is done update that note in the notes array
     addToNotes: (state) => {
       let added_notes_array = state.notes.notes_to_display;
-      let index = added_notes_array.findIndex(state.note.note);
-      console.log(index)
-      if (index) {
+      console.log(state.note.note)
+      let index = added_notes_array.findIndex(
+        (note) => state.note.note.id == note.id
+      );
+      //if user is editing a note a update the note in the notes array
+      if (index >= 0) {
         added_notes_array[index] = state.note.note;
-      } else {
-        added_notes_array.push(state.note.note);
+      }
+      //if the user is creating a new note add that note to the top of notes array
+      else {
+        added_notes_array.unshift(state.note.note);
       }
       state.notes = { ...state.notes, notes_to_display: added_notes_array };
       state.note = { ...state.note, note: null };
@@ -158,15 +171,33 @@ export const store = new Vuex.Store({
         selected_notes: [],
       };
     },
-
-    removeNote(state) {
-      state.note.note = { ...state.note, note: {} };
+     //remove the notes from home page which are either deleted or added to a group
+     removeGroups: (state) => {
+      let notes_groups = state.notes.notes_groups.filter((group) => {
+        let removeItem = false;
+        state.notes.selected_groups.forEach((group_id) => {
+          if (group.id === group_id) {
+            //if the note is in the selected notes remove it
+            removeItem = true;
+          }
+        });
+        if (!removeItem) {
+          return true; //keep the note if it is note in the selected notes
+        }
+      });
+      state.notes = {
+        ...state.notes,
+        notes_groups: notes_groups,
+        loading: false,
+        selected_groups: [],
+      };
     },
   },
 
   actions: {
     loginUser: ({ commit }, user) => {
       return new Promise((resolve, reject) => {
+        commit("loadingUser");
         axios
           .post("login", {
             email: user.email,
@@ -203,8 +234,6 @@ export const store = new Vuex.Store({
 
     //create a new note
     createNote: ({ commit, state }, { note_body: { title, body, color } }) => {
-      console.log("create");
-
       axios
         .post("notes", {
           userId: state.auth.user.id,
@@ -213,7 +242,6 @@ export const store = new Vuex.Store({
           color: color,
         })
         .then((res) => {
-          console.log(res);
           commit("setNote", res.data.note);
         })
         .catch((error) => {
@@ -223,6 +251,8 @@ export const store = new Vuex.Store({
 
     //update an already existing note
     updateNote: ({ commit, state }, { note_body: { title, body, color } }) => {
+      commit("setNote", {...state.note.note, title,body,color});
+      console.log(title+color+body)
       axios
         .put(`notes/${state.note.note.id}`, {
           title: title,
@@ -232,9 +262,7 @@ export const store = new Vuex.Store({
         .catch((error) => {
           console.log(error.response);
         })
-        .then((res) => {
-          commit("setNote", res.data.note);
-        });
+     
     },
 
     //create a new group
@@ -294,9 +322,13 @@ export const store = new Vuex.Store({
         .catch((error) => {
           console.log(error.response);
         })
-        .then((res) => {
-          console.log(res);
-          commit("removeNotes");
+        .then(() => {
+          if(state.notes.selected_notes){
+            commit("removeNotes");
+          }
+          if(state.notes.selected_groups){
+            commit("removeGroups");
+          }
         });
     },
   },

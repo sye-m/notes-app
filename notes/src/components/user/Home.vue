@@ -138,11 +138,7 @@
         <router-view></router-view>
       </div>
     </div>
-    <modal
-      :modal_type="modal_type"
-      @newGroup="newGroup"
-      @del="deleteNotes"
-    ></modal>
+    <modal :modal_type="modal_type" @newGroup="newGroup" @del="deleteNotes"></modal>
   </div>
 </template>
 
@@ -174,26 +170,25 @@ export default {
     Modal,
   },
   methods: {
+    //if user clicks outside of the area of create note that note will be added to the notes array
     addToNotes(e) {
-      //if user clicks outside of the area of create note that note will be added to the notes array
       if (
         e.target !== document.getElementById("new-note") &&
         (document.getElementById("new-note-title").innerText !== "" ||
           document.getElementById("new-note-body").innerText !== "") &&
         this.$store.state.note.note
       ) {
-        let val = (document.getElementById("new-note-title").innerText !== "" ||
-          document.getElementById("new-note-body").innerText !== "")
-        console.log("Val"+val)
         this.$store.commit("addToNotes");
         //reset the note
         document.getElementById("new-note-title").textContent = "";
         document.getElementById("new-note-body").textContent = "";
       }
+    
     },
 
     newGroup() {
-      let group_title = document.getElementById("group-title").textContent;
+      let group_title = document.getElementById("group-title").value;
+      console.log(group_title)
       this.$store.dispatch({
         type: "newGroup",
         group_title,

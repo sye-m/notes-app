@@ -39,6 +39,7 @@ export default {
             type:Object,
         },
         editable:{
+            type:Boolean,
              default: function () {
                 return true
         },
@@ -54,7 +55,7 @@ export default {
         return {
             title:this.note ? this.note.title:'',
             body:this.note ? this.note.body:'',
-            note_color:this.note?this.note.color:'#007bff',
+            note_color:this.note? this.note.color:'#007bff',
             notes_colors:['#007bff','#FF6600','#FFCC00','#00FF00','#462066','#FF0000'],
             timeoutId:'',
             showColors:false
@@ -74,8 +75,8 @@ export default {
         }
     },
     methods:{
+        //change the note color
         noteColorChange(color){
-            //change the note color
             this.note_color=color;
              let note_body = {
                     title:this.note.title,
@@ -87,8 +88,9 @@ export default {
             //update the note color
             this.$store.dispatch({type:'updateNote',note_body})
         },
+
         editNote(){
-            if(!this.$store.state.note.editNote){
+            if(!this.editable){
                 this.$store.commit('editNote',this.note);
             }
         },
@@ -100,8 +102,8 @@ export default {
             else if(e.target.id==='new-note-body'){
                 this.body = e.target.innerText
             }
-
         },  
+
         selectNote(note_id){
             var selectedNote =document.getElementById('note'+note_id);
             if(selectedNote.classList.contains("selected")){
@@ -112,11 +114,13 @@ export default {
             }
         this.$store.commit('selectNote',note_id);
         },
+        
         newNote(e){
             this.getContent (e);
             //check to see if note is empty and don't save the note if just the enter key is pressed
             if(e.key!=='Enter' && (this.title !== '' || this.body!== '')){
 
+                console.log(this.body)
                 let note_body = {
                     title:this.title,
                     body:this.body,
@@ -133,7 +137,7 @@ export default {
                 else {
                     this.$store.dispatch({type:'updateNote',note_body})
                 }
-                },750);//wait 0.75 second before sending the request to the server to update or create note
+                },500);//wait 0.5 second before sending the request to the server to update or create note
             }
         },
     }
@@ -146,6 +150,7 @@ export default {
     position: relative;
     word-break: break-word;
     transition:background-color 0.5s;
+    
 }
 
 #new-note-title{
@@ -194,6 +199,19 @@ export default {
   height:0px;
 }
 
+.note-colors{
+    width:27%;
+    height:34%;
+    border-width: 1.5px;
+    border-style: outset;
+    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(195, 195, 195));
+    outline:none;
+} 
+
+.set-color-button{
+    color:blue;
+}
+
 .note-colors-container{
     position: absolute;
     width: 136px;
@@ -206,19 +224,6 @@ export default {
     background-color: white;
     border-radius: 10px;
     z-index:4000;
-}
-
-.note-colors{
-    width:27%;
-    height:34%;
-    border-width: 1.5px;
-    border-style: outset;
-    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(195, 195, 195));
-    outline:none;
-} 
-
-.set-color-button{
-    color:blue;
 }
 
 .note-colors-container::after{

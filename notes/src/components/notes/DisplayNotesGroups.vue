@@ -1,19 +1,18 @@
 <template>
-    <div class="row d-flex flex-wrap justify-content-center notes-group-container">
+    <div class="row d-flex flex-wrap notes-group-container">
         <div class="notes-group d-flex m-3 p-2" v-for="group in notes_groups" :id="'group'+group.id" :key="group.id">
-                <router-link :to="{ name: 'group', params: {group_title:group.title}, query:{group_id:group.id}}">
-                    <i class="fa fa-folder folder" aria-hidden="true"></i>
-                    <p class="group-title">
-                    {{group.title}}
-                    </p>
-                </router-link>
-                <div class="select-group">
-                    <button @click="selectGroup(group.id)" class="btn btn-dark btn-circle"> 
-                    <i class="fa fa-check" aria-hidden="true"></i>
-                    </button>
-                </div>
+            <router-link :to="{ name: 'group', params: {group_title:group.title}, query:{group_id:group.id}}">
+                <i class="fa fa-folder folder" aria-hidden="true"></i>
+                <p class="group-title">
+                {{group.title}}
+                </p>
+            </router-link>
+            <div class="select-group">
+                <button @click="selectGroup(group.id)" class="btn btn-dark btn-circle"> 
+                <i class="fa fa-check" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
-      
     </div>
 </template>
 

@@ -99,7 +99,6 @@
                 }).catch(error=>{
                     console.log(error);
                 }).then((res)=>{
-                    console.log(res);
                     if(res.data.errors){
                         this.errors.email = res.data.errors.email
                     }

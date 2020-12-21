@@ -18,7 +18,10 @@
         </div>
 
         <div>
-           <button type="submit" class="btn btn-primary form-control" value="Register">Log In</button>
+           <button type="submit" class="btn btn-primary form-control" value="Register" :disabled="$store.state.auth.loading">
+               <span v-if="!$store.state.auth.loading">Log In</span>
+               <div class="spinner-border spinner-border-sm" role="status" v-else></div>
+           </button>
        </div>
         </form>
         <div class="alert alert-danger mt-2" v-if="error">
