@@ -6,6 +6,7 @@
 export default {
   name:'App',
   created(){
+  //get the user
     this.$store.dispatch({type:'getUser'});
   },
   beforeRouteEnter (to, from, next) {
